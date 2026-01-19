@@ -1,0 +1,64 @@
+{
+  "split": "test",
+  "model_path": "models\\best.pt",
+  "num_samples": 1453,
+  "overall_accuracy": 0.8651066758430833,
+  "per_class": {
+    "cat": {
+      "class_id": 0,
+      "one_vs_rest_accuracy": 0.9463179628355127,
+      "cm_2x2": [
+        [
+          1029,
+          40
+        ],
+        [
+          38,
+          346
+        ]
+      ]
+    },
+    "dog": {
+      "class_id": 1,
+      "one_vs_rest_accuracy": 0.930488644184446,
+      "cm_2x2": [
+        [
+          1035,
+          44
+        ],
+        [
+          57,
+          317
+        ]
+      ]
+    },
+    "car": {
+      "class_id": 2,
+      "one_vs_rest_accuracy": 0.9242945629731589,
+      "cm_2x2": [
+        [
+          892,
+          61
+        ],
+        [
+          49,
+          451
+        ]
+      ]
+    },
+    "bicycle": {
+      "class_id": 3,
+      "one_vs_rest_accuracy": 0.9291121816930489,
+      "cm_2x2": [
+        [
+          1207,
+          51
+        ],
+        [
+          52,
+          143
+        ]
+      ]
+    }
+  }
+}
