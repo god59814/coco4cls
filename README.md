@@ -112,7 +112,7 @@ flowchart LR
   - bicycle: **0.9291**
 
 > 關於「每類 accuracy > 95%」：已實作題目要求的 per-class confusion matrix 與 per-class accuracy 計算流程。  
-> 若需將所有類別提升至 >95%，常見做法包含：更嚴格資料過濾（例如 bbox 面積門檻）、物件裁切（object-centric crop）、更強 backbone、或增加 fine-tuning 訓練策略。
+> 若需將所有類別提升至 >95%，常見做法包含：更嚴格資料過濾（例如 bbox 面積門檻）、物件裁切（object-centric crop）、更強 backbone、或增加 fine-tuning 訓練策略。尚未成功達成目標。
 
 ---
 
@@ -181,7 +181,7 @@ docker compose up --build
 
 ## API 文件連結 (API Docs)
 
-FastAPI 服務位於 `app/`。啟動後可用 Swagger UI：
+FastAPI 服務位於 `app/`。啟動 API 前需先訓練產生 models/best.pt，啟動後可用 Swagger UI：
 
 uvicorn app.main:app --host 0.0.0.0 --port 8000
 
