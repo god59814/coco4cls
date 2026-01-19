@@ -1,74 +1,99 @@
-# COCO-4CLS (MS COCO 4-class Image Classification)
+# COCO-4CLS (MS COCO 2017 4-class Image Classification)
 
-本專案以 MS COCO (2017) 為資料來源，建立「**四分類影像分類**」模型（**不是 object detection**）。
-核心做法：從 COCO 標註中挑出**只包含單一目標類別且不含其他類別**的影像，轉成乾淨的 classification dataset 來訓練。
+本專案以 **MS COCO 2017** 為資料來源，建立「**四分類影像分類（classification）**」模型（**不是 object detection**）。  
+做法：將 COCO 的 detection annotations 轉成 **single-label** 的 4-class classification dataset（使用 CSV manifests 管理），再使用 CNN backbone 訓練分類器，最後輸出整體與每類的 confusion matrix 與 accuracy。
 
-## 題目要求對應 (Deliverables)
-1. ✅ 完整專案代碼
-2. ✅ README.md（本檔包含：介紹/技術棧/本地運行/Docker/API/測試帳號）
-3. ✅ `.env.example`
-4. ✅ 至少一份測試 CSV：`data/sample_inference.csv`
-5. ✅ 系統架構圖：
-   - Mermaid：本 README 內
-   - 圖檔產生腳本：`scripts/export_architecture_diagram.py`（會輸出 `docs/architecture.png`）
+> 本專案為 image-level classification：不輸出 bbox、不做 NMS、不包含 detection head。
 
 ---
 
-## 選擇的 4 類別 (可自行替換)
+## 題目要求對應 (Deliverables)
+
+1. ✅ 完整專案代碼（已上傳 GitHub；COCO 原始資料與模型權重不放入 repo）
+2. ✅ README.md（包含：專案介紹 / 技術棧 / 本地運行步驟 / Docker 部署指令 / API 文件連結 / 測試帳號資訊）
+3. ✅ `.env.example`
+4. ✅ 至少一份測試 CSV：`data/sample_inference.csv`
+5. ✅ 系統架構圖：README 內 Mermaid + 評估輸出（`docs/`）
+
+---
+
+## 選擇的 4 類別 (Ground Truth Classes)
+
 預設使用 COCO categories：
-- `person`
-- `car`
+- `cat`
 - `dog`
+- `car`
 - `bicycle`
 
-你可以在 `.env` 或 CLI 參數改成其他 4 類。
+可於 `.env` 修改 `CATEGORIES=...` 替換為其他 4 類（需為 COCO 合法 category name）。
 
 ---
 
 ## 技術棧 (Tech Stack)
+
 - Training / Inference: **PyTorch**, **torchvision**
-- Backbone: **timm**（預訓練模型）
+- Backbone: **torchvision.models.efficientnet_b0**（ImageNet pretrained）
 - Data: **pycocotools**, pandas
-- Eval: **scikit-learn**
-- Serving API: **FastAPI** + Uvicorn
-- Docker 部署：Dockerfile / docker-compose
+- Eval: **scikit-learn**（confusion matrix）, matplotlib（輸出圖）
+- Serving API: **FastAPI** + Uvicorn（`app/`）
+- Docker: **尚未提供**（見下方 Docker 章節）
 
 ---
 
-## Backbone 選擇與理由 + 修改點
-### Backbone：EfficientNetV2-S（預訓練 ImageNet）
+## Backbone 選擇與理由
+
+### Backbone：EfficientNet-B0（torchvision, ImageNet pretrained）
+
 理由：
-- 在 accuracy / params / speed 之間非常均衡
-- timm 可一行載入 pretrained weights，適合小資料或快速達標
-- 對於 224x224 影像分類很成熟穩定
+- 在 accuracy / params / speed 之間平衡，適合 classification 任務
+- torchvision 原生支援、相依性少，環境重現成本較低
+- 使用 ImageNet 預訓練權重可加速收斂、提升穩定性
 
-修改點（加分項）：
-- 只替換 classification head（`num_classes=4`）
-- Head 加 Dropout
-- Training 加 **Label Smoothing**
-- 可選 Mixup/CutMix（預設關閉，避免干擾你對指標的解讀）
+修改點（符合「modify backbone」加分方向）：
+- 將 EfficientNet-B0 的分類 head 替換為 `num_classes=4` 的 Linear layer，輸出 4-class logits（softmax）。
 
 ---
 
-## 本地執行 (Local Run)
+## Item 4：每類 confusion matrix + 每類 accuracy 設計說明
 
-### 1) 建立環境 & 安裝
-```bash
-python -m venv .venv
-# Windows: .venv\Scripts\activate
-# Mac/Linux:
-source .venv/bin/activate
+題目要求：
+- each class has its own confusion matrix
+- each class accuracy above 95% would be acceptable
 
-pip install -r requirements.txt
+### (1) 為什麼需要 per-class confusion matrix？
+多類分類通常使用 4x4 confusion matrix，但題目要求「每一類有自己的 confusion matrix」。  
+因此評估時對每一類額外進行 **one-vs-rest（二元化）**，輸出 **2x2 confusion matrix**。
 
-overall accuracy: 0.8651
+### (2) one-vs-rest 2x2 confusion matrix 定義
+對第 k 類：
+- Positive：真實標籤為 k
+- Negative：真實標籤非 k（其餘三類）
 
-per-class one-vs-rest accuracy:
+得到 2x2（TN / FP / FN / TP）。
 
-cat 0.9463
+### (3) 每類 accuracy 定義
+採用 one-vs-rest 的二元 accuracy：
+Acc_k = (TP_k + TN_k) / (TP_k + TN_k + FP_k + FN_k)
 
-dog 0.9305
+### (4) 評估輸出位置
+執行 `python scripts/evaluate.py --split test` 後，輸出到 `results/`；  
+為便於驗收，已將關鍵輸出放入 repo 的 `docs/` 目錄：
 
-car 0.9243
+- 整體 4x4 confusion matrix：`docs/confusion_matrix_4x4.png`
+- 每類 2x2 confusion matrix：
+  - `docs/class_cat_cm_2x2.png`
+  - `docs/class_dog_cm_2x2.png`
+  - `docs/class_car_cm_2x2.png`
+  - `docs/class_bicycle_cm_2x2.png`
+- 指標：`docs/metrics.json`
 
-bicycle 0.9291
+---
+
+## 系統架構圖 (Architecture)
+
+```mermaid
+flowchart LR
+  A[COCO 2017 images + annotations] --> B[prepare_coco_cls_dataset.py<br/>Generate train/val/test CSV]
+  B --> C[train.py<br/>Train EfficientNet-B0 classifier]
+  C --> D[evaluate.py<br/>4x4 CM + per-class 2x2 CM + metrics.json]
+  C --> E[FastAPI API (optional)<br/>app/main.py]
