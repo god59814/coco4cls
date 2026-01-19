@@ -97,8 +97,6 @@ flowchart LR
   B --> C["train.py (EfficientNet-B0)"]
   C --> D["evaluate.py (4x4 CM + per-class 2x2 CM)"]
   C --> E["FastAPI API (optional): app/main.py"]
-
-
 ```
 
 
