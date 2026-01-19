@@ -72,7 +72,7 @@
 得到 2x2（TN / FP / FN / TP）。
 
 ### (3) 每類 accuracy 定義
-採用 one-vs-rest 的二元 accuracy：
+採用 one-vs-rest 的二元 accuracy：  
 Acc_k = (TP_k + TN_k) / (TP_k + TN_k + FP_k + FN_k)
 
 ### (4) 評估輸出位置
@@ -97,3 +97,95 @@ flowchart LR
   B --> C[train.py<br/>Train EfficientNet-B0 classifier]
   C --> D[evaluate.py<br/>4x4 CM + per-class 2x2 CM + metrics.json]
   C --> E[FastAPI API (optional)<br/>app/main.py]
+```
+
+
+---
+
+## Results (Test Split)
+
+- overall accuracy: **0.8651**
+- per-class one-vs-rest accuracy:
+  - cat: **0.9463**
+  - dog: **0.9305**
+  - car: **0.9243**
+  - bicycle: **0.9291**
+
+> 關於「每類 accuracy > 95%」：已實作題目要求的 per-class confusion matrix 與 per-class accuracy 計算流程。  
+> 若需將所有類別提升至 >95%，常見做法包含：更嚴格資料過濾（例如 bbox 面積門檻）、物件裁切（object-centric crop）、更強 backbone、或增加 fine-tuning 訓練策略。
+
+---
+
+## 本地運行步驟 (Local Run)
+
+本專案採用 `src/` layout（`src/coco4cls`）。建議使用 `pip install -e .` 以避免 import path 問題。
+
+### 1) 建立環境與安裝（Windows / PowerShell）
+py -3.11 -m venv .venv  
+.\.venv\Scripts\activate  
+pip install -r requirements.txt  
+copy .env.example .env  
+
+### 2) 安裝成 editable package（推薦）
+pip install -e .
+
+### 3) 下載 COCO 2017（很大）
+python scripts/download_coco2017.py
+
+### 4) 產生 4-class CSV manifests
+python scripts/prepare_coco_cls_dataset.py
+
+輸出：
+- dataset_coco4cls/train.csv
+- dataset_coco4cls/val.csv
+- dataset_coco4cls/test.csv
+
+### 5) 訓練
+python scripts/train.py
+
+輸出（不放入 repo）：
+- models/best.pt
+- models/last.pt
+
+### 6) 評估
+python scripts/evaluate.py --split test
+
+輸出（不放入 repo）：
+- results/*
+
+驗收用輸出（已放入 repo）：
+- docs/confusion_matrix_4x4.png
+- docs/class_*_cm_2x2.png
+- docs/metrics.json
+
+---
+
+## Docker 部署指令 (Docker)
+
+目前尚未提供 Dockerfile / docker-compose 的部署版本（避免提供無法直接執行的指令）。  
+若需 Docker 部署，可在後續加入 Dockerfile 與 docker-compose.yml 後，於此章節補上可直接執行的 build/run 指令。
+
+---
+
+## API 文件連結 (API Docs)
+
+FastAPI 服務位於 `app/`。啟動後可用 Swagger UI：
+
+uvicorn app.main:app --host 0.0.0.0 --port 8000
+
+- Swagger：http://localhost:8000/docs
+
+---
+
+## 測試帳號資訊 (Test Account)
+
+- N/A（無登入/權限驗證）
+
+---
+
+## 測試資料 CSV 範例
+
+- 檔案：data/sample_inference.csv
+- 欄位：image_path（每列一張圖片路徑）
+
+---
