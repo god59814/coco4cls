@@ -4,7 +4,7 @@
 核心做法：從 COCO 標註中挑出**只包含單一目標類別且不含其他類別**的影像，轉成乾淨的 classification dataset 來訓練。
 
 ## 題目要求對應 (Deliverables)
-1. ✅ 完整專案代碼（可直接推 GitHub；見本 repo）
+1. ✅ 完整專案代碼
 2. ✅ README.md（本檔包含：介紹/技術棧/本地運行/Docker/API/測試帳號）
 3. ✅ `.env.example`
 4. ✅ 至少一份測試 CSV：`data/sample_inference.csv`
