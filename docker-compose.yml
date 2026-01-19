@@ -1,0 +1,15 @@
+services:
+  api:
+    build: .
+    image: coco4cls:latest
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    volumes:
+      - ./models:/workspace/models
+      - ./results:/workspace/results
+      - ./docs:/workspace/docs
+      - ./data:/workspace/data
+      - ./coco:/workspace/coco
+      - ./dataset_coco4cls:/workspace/dataset_coco4cls

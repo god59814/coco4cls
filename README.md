@@ -164,8 +164,31 @@ python scripts/evaluate.py --split test
 
 ## Docker 部署指令 (Docker)
 
-目前尚未提供 Dockerfile / docker-compose 的部署版本（避免提供無法直接執行的指令）。  
-若需 Docker 部署，可在後續加入 Dockerfile 與 docker-compose.yml 後，於此章節補上可直接執行的 build/run 指令。
+### Build & Run（啟動 API）
+```bash
+docker build -t coco4cls:latest .
+docker run --rm -it -p 8000:8000 --env-file .env coco4cls:latest
+```
+
+### docker-compose（推薦）
+```bash
+docker compose up --build
+```
+
+啟動後：
+- Swagger：`http://localhost:8000/docs`
+
+
+### docker-compose（推薦）
+
+```bash
+docker compose up --build
+```
+
+啟動後：
+
+* Swagger：`http://localhost:8000/docs`
+
 
 ---
 
