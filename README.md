@@ -170,24 +170,13 @@ docker build -t coco4cls:latest .
 docker run --rm -it -p 8000:8000 --env-file .env coco4cls:latest
 ```
 
-### docker-compose（推薦）
+### docker-compose
 ```bash
 docker compose up --build
 ```
 
 啟動後：
 - Swagger：`http://localhost:8000/docs`
-
-
-### docker-compose（推薦）
-
-```bash
-docker compose up --build
-```
-
-啟動後：
-
-* Swagger：`http://localhost:8000/docs`
 
 
 ---
