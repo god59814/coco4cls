@@ -60,3 +60,15 @@ python -m venv .venv
 source .venv/bin/activate
 
 pip install -r requirements.txt
+
+overall accuracy: 0.8651
+
+per-class one-vs-rest accuracy:
+
+cat 0.9463
+
+dog 0.9305
+
+car 0.9243
+
+bicycle 0.9291
