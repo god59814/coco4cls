@@ -93,10 +93,11 @@ Acc_k = (TP_k + TN_k) / (TP_k + TN_k + FP_k + FN_k)
 
 ```mermaid
 flowchart LR
-  A[COCO 2017 images + annotations] --> B[prepare_coco_cls_dataset.py\nGenerate train/val/test CSV]
-  B --> C[train.py\nTrain EfficientNet-B0 classifier]
-  C --> D[evaluate.py\n4x4 CM + per-class 2x2 CM + metrics.json]
-  C --> E[FastAPI API (optional)\napp/main.py]
+  A[COCO 2017 images + annotations] --> B[prepare_coco_cls_dataset.py (generate CSV)]
+  B --> C[train.py (EfficientNet-B0)]
+  C --> D[evaluate.py (4x4 CM + per-class 2x2 CM)]
+  C --> E[FastAPI API (optional): app/main.py]
+
 
 ```
 
